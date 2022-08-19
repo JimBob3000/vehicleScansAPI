@@ -68,7 +68,7 @@ func getMotHistory(w http.ResponseWriter, r *http.Request) {
 	vrn := vars["vrn"]
 	fmt.Println("Endpoint Hit: getMotHistory, VRN: " + vrn)
 
-	url := "https://beta.check-mot.service.gov.uk/trade/vehicles/mot-tests?registration=" + vrn
+	url := os.Getenv("MOT_API_URL") + "?registration=" + vrn
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-api-key", os.Getenv("MOT_KEY"))
 	req.Header.Set("Content-Type", "application/json")
@@ -94,7 +94,7 @@ func getMotRecords(w http.ResponseWriter, r *http.Request) {
 	page := vars["page"]
 	fmt.Println("Endpoint Hit: getMotRecords, page: " + page)
 
-	url := "https://beta.check-mot.service.gov.uk/trade/vehicles/mot-tests?page=" + page
+	url := os.Getenv("MOT_API_URL") + "?page=" + page
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-api-key", os.Getenv("MOT_KEY"))
 	req.Header.Set("Content-Type", "application/json")
@@ -120,7 +120,7 @@ func getDvlaRecord(w http.ResponseWriter, r *http.Request) {
 	vrn := vars["vrn"]
 	fmt.Println("Endpoint Hit: getDvlaRecord, VRN: " + vrn)
 
-	url := "https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles"
+	url := os.Getenv("DVLA_API_URL")
 	var jsonStr = []byte(`{"registrationNumber":"` + vrn + `"}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("x-api-key", os.Getenv("DVLA_KEY"))
@@ -153,7 +153,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/motPage/{page}", getMotRecords)
 	myRouter.HandleFunc("/dvla/{vrn}", getDvlaRecord)
 	myRouter.HandleFunc("/health", healthCheck)
-	log.Fatal(http.ListenAndServe(":8080", myRouter))
+	log.Fatal(http.ListenAndServeTLS(":8080", os.Getenv("CERT_PATH")+"/ssl.cert", os.Getenv("CERT_PATH")+"/ssl.key", myRouter))
 }
 
 func main() {

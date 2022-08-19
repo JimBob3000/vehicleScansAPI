@@ -6,3 +6,6 @@ This app requires environment variables for the gov apis (MOT_KEY and DVLA_KEY).
 set these using the following:
 export MOT_KEY=abc
 export DVLA_KEY=xyz
+
+To build the app with the name 'api', run the following:
+go build -o api
