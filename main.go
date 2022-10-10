@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 type Mot []MotVehicle
@@ -148,15 +148,32 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
+	fmt.Println("Setting routes...")
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/mot/{vrn}", getMotHistory)
 	myRouter.HandleFunc("/motPage/{page}", getMotRecords)
 	myRouter.HandleFunc("/dvla/{vrn}", getDvlaRecord)
 	myRouter.HandleFunc("/health", healthCheck)
-	log.Fatal(http.ListenAndServeTLS(":8080", os.Getenv("CERT_PATH")+"/ssl.cert", os.Getenv("CERT_PATH")+"/ssl.key", myRouter))
+
+	fmt.Println("Listening on port 8080...")
+	err := http.ListenAndServeTLS(":8080", os.Getenv("CERT_PATH")+"/ssl.cert", os.Getenv("CERT_PATH")+"/ssl.key", myRouter)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	fmt.Println("API ready.")
 }
 
 func main() {
-	fmt.Println("API Deploying...")
+	fmt.Println("API deploying...")
+
+	fmt.Println("Loading env vars...")
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
 	handleRequests()
 }
